@@ -53,20 +53,25 @@ public class DataMiningExample {
         Instances train = Filter.useFilter(randomData,filterRemove); //el 100% menos el 34% es lo que se queda en el train
         System.out.println("Trainen istantzia kopurua: " + train.numInstances());
 
+
         RemovePercentage filterRemove2 = new RemovePercentage();
         filterRemove2.setInputFormat(randomData);
         filterRemove2.setPercentage(34);
         filterRemove2.setInvertSelection(true); //quita el 66% de las instancias empezando desde abajo
 
+
         Instances test = Filter.useFilter(randomData, filterRemove2);
         test.setClassIndex(test.numAttributes()-1);
 
-
         System.out.println("Test-en istantzia kopurua: " + test.numInstances());
+
+        System.out.println("");
+
         train.setClassIndex(train.numAttributes()-1);
 
         NaiveBayes clasifier = new NaiveBayes();
         clasifier.buildClassifier(train);
+
 
         Evaluation evaluator = new Evaluation(train);
         evaluator.evaluateModel(clasifier,test);
@@ -74,14 +79,7 @@ public class DataMiningExample {
 
 
         ///////////////////////////////////////////
-        double acc=evaluator.pctCorrect();
-        double inc=evaluator.pctIncorrect();
-        double kappa=evaluator.kappa();
-        double mae=evaluator.meanAbsoluteError();
-        double rmse=evaluator.rootMeanSquaredError();
-        double rae=evaluator.relativeAbsoluteError();
-        double rrse=evaluator.rootRelativeSquaredError();
-        double confMatrix[][]= evaluator.confusionMatrix();
+
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(path2));
         Date date = new Date();
@@ -100,37 +98,18 @@ public class DataMiningExample {
         writer.write(evaluator.toSummaryString("\nResults\n========================\n", false));
         writer.write("Estimated Accuracy: " + Double.toString(evaluator.pctCorrect()) + "\n");
         writer.write(evaluator.toClassDetailsString());
+        writer.write(evaluator.toMatrixString());
 
 
         writer.flush();
         writer.close();
 
-        System.out.println("Correctly Classified Instances  " + acc);
-        System.out.println("Incorrectly Classified Instances  " + inc);
-        System.out.println("Kappa statistic  " + kappa);
-        System.out.println("Mean absolute error  " + mae);
-        System.out.println("Root mean squared error  " + rmse);
-        System.out.println("Relative absolute error  " + rae);
-        System.out.println("Root relative squared error  " + rrse);
+        System.out.println("Accuracy "+evaluator.pctCorrect());
+        System.out.println("F-measure "+evaluator.weightedFMeasure());
+        System.out.println(evaluator.toSummaryString("\nResults\n======\n", false));
+        System.out.println("Estimated Accuracy: " + Double.toString(evaluator.pctCorrect()));
+        System.out.println(evaluator.toClassDetailsString());
+        System.out.println(evaluator.toMatrixString());
 
-        System.out.println();
-        System.out.println();
-
-        int i = 0;
-        int a = 0;
-        String lista[] = {"a","b","c","d","e"};
-        System.out.println("=== Confusion Matrix ===");
-        System.out.println("     a     b   <-- Classified as");
-        while (i < confMatrix.length){
-            while(a < confMatrix.length){
-                System.out.print(confMatrix[i][a] + " ");
-                a ++;
-            }
-            System.out.print("|    " + lista[i] + " = " + data.attribute(data.numAttributes()-1).value(i));
-            System.out.println();
-            a = 0;
-            i ++;
-
-        }
     }
 }
